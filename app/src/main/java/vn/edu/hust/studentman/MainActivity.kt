@@ -45,38 +45,45 @@ class MainActivity : ComponentActivity(),StudentAdapter.OnStudentActionListener 
         StudentModel("Phạm Thị Tuyết", "SV019"),
         StudentModel("Lê Văn Vũ", "SV020")
     )
-
+    fun showCustomDialog(isAddNew: Boolean, position: Int) {
+        val dialog = Dialog(this)
+        dialog.setContentView(R.layout.dialog)
+        val editFullName = dialog.findViewById<EditText>(R.id.editTextText)
+        val editSID = dialog.findViewById<EditText>(R.id.editTextText2)
+        if (!isAddNew) {
+            editFullName.setText(students[position].studentName)
+            editSID.setText(students[position].studentId)
+            Toast.makeText(this, "Edit: ${students[position]}", Toast.LENGTH_SHORT).show()
+        }
+        dialog.findViewById<Button>(R.id.dialogBtnSave).setOnClickListener {
+// TODO: Do something with name and email
+            if (isAddNew) {
+                students.add(students.size, StudentModel(editFullName.text.toString(), editSID.text.toString()))
+            }else {
+                students[position] = StudentModel(editFullName.text.toString(), editSID.text.toString())
+            } 
+            dialog.dismiss()
+        }
+        dialog.findViewById<Button>(R.id.dialogBtnCancel).setOnClickListener {
+            dialog.dismiss()
+        }
+        dialog.window?.setLayout(
+            ViewGroup.LayoutParams.MATCH_PARENT,
+            ViewGroup.LayoutParams.WRAP_CONTENT
+        )
+        dialog.show()
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        fun showCustomDialog(name: String, SID: String) {
-            val dialog = Dialog(this)
-            dialog.setContentView(R.layout.dialog)
-            val editFullName = dialog.findViewById<EditText>(R.id.editTextText)
-            editFullName.setText(name)
-            val editSID = dialog.findViewById<EditText>(R.id.editTextText2)
-            editSID.setText(SID)
-            dialog.findViewById<Button>(R.id.dialogBtnSave).setOnClickListener {
-// TODO: Do something with name and email
 
-                dialog.dismiss()
-            }
-            dialog.findViewById<Button>(R.id.dialogBtnCancel).setOnClickListener {
-                dialog.dismiss()
-            }
-            dialog.window?.setLayout(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT
-            )
-            dialog.show()
-        }
 
         val recyclerView = findViewById<RecyclerView>(R.id.recycler_view_students)
         recyclerView.layoutManager = LinearLayoutManager(this)
         val addBtn = findViewById<Button>(R.id.btn_add_new)
         addBtn.setOnClickListener{
-            showCustomDialog("","")
+            showCustomDialog(true, 0)
         }
 
         studentAdapter = StudentAdapter(students, this)
@@ -84,16 +91,18 @@ class MainActivity : ComponentActivity(),StudentAdapter.OnStudentActionListener 
 
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     override fun onEditStudent(position: Int) {
-        Toast.makeText(this, "Edit: ${students[position]}", Toast.LENGTH_SHORT).show()
         // Add your edit logic here
+        showCustomDialog(false, position)
+        studentAdapter.notifyDataSetChanged()
     }
 
     @SuppressLint("NotifyDataSetChanged")
     override fun onRemoveStudent(position: Int) {
-        Toast.makeText(this, "Remove: ${students[position]}", Toast.LENGTH_SHORT).show()
         // Add your remove logic here
         students.removeAt(position)
         studentAdapter.notifyDataSetChanged()
+        Toast.makeText(this, "Remove: ${students[position]}", Toast.LENGTH_SHORT).show()
     }
 }
